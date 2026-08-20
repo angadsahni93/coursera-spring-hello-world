@@ -5,7 +5,7 @@ on:
     branches: 
     - main 
   
-  workflow_dispatch:
+  workflow_dispatch: # Allows manual runs from the GitHub Actions UI.
 
 
 jobs:
