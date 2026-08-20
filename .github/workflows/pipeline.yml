@@ -58,7 +58,7 @@ jobs:
     # Runs the deploy job on a temporary GitHub-hosted Ubuntu machine.
     runs-on: ubuntu-latest
     # Waits until the Docker build-and-push job has completed successfully.
-    needs: docker-build-push
+    needs: build
 
     steps:
     - name: Deploy via SSH to EC2
@@ -70,9 +70,9 @@ jobs:
         username: ubuntu
         # SSH private key stored as a GitHub Secret.
         key: ${{ secrets.SSH_PRIVATE_KEY_EC2 }}
-        script:
+        script: |
           # Pulls the latest image versions defined in docker-compose.yml onto the EC2 server.
-          - docker compose pull
+          docker compose pull
 
           # Recreates and starts the containers in detached mode using the latest pulled images.
-          - docker compose up -d --force-recreate
+          docker compose up -d --force-recreate
