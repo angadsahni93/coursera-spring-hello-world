@@ -24,6 +24,14 @@ script.sh is used to set up the EC2 server environment, for example installing D
 Spring-boot-keys.pem is the private SSH key that proves you are allowed to connect to the EC2 instance. It is used by scp to copy files to EC2 and by ssh to log into EC2.
 ```
 
+To create the `SSH_PRIVATE_KEY_EC2` GitHub Secret, copy the full contents of the `.pem` file:
+
+```bash
+cat Spring-boot-keys.pem
+```
+
+Save the copied value in GitHub under `Settings -> Secrets and variables -> Actions -> New repository secret` with the name `SSH_PRIVATE_KEY_EC2`. Do not commit the `.pem` file to GitHub.
+
 1. Secure the private key file on your Mac so only your Mac user can read it. SSH requires this before it will use the key.
 
 ```bash
