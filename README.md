@@ -107,7 +107,7 @@ EC2 port 8080 -> container port 80
 So the app should be reached through EC2 on port `8080`, while the Spring Boot container still listens internally on port `80`.
 
 
-## GitHub Actions Pipeline Flow
+## GitHub Actions Pipeline Flow (.github/workflows/pipeline.yml)
 
 ```text
 [1] name: CI/CD Pipeline
