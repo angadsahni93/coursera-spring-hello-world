@@ -9,27 +9,70 @@ on:
 
 
 jobs:
+  # Build job that prepares and pushes the Docker image.
   build:
+    # Runs the build job on a temporary GitHub-hosted Ubuntu machine.
     runs-on: ubuntu-latest
 
+    # Ordered actions and commands run inside the build job.
     steps:
+    # Downloads the repository code onto the GitHub runner.
     - name: Checkout code
+      # Uses GitHub's checkout action to make project files available.
       uses: actions/checkout@v3
 
+    # Authenticates the GitHub runner with AWS.
     - name: Configure AWS Credentials
+      # Uses the AWS credentials action.
       uses: aws-actions/configure-aws-credentials@v2
+      # Supplies AWS settings from GitHub Secrets.
       with:
+        # AWS access key stored as a GitHub Secret.
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        # AWS secret key stored as a GitHub Secret.
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        # AWS region stored as a GitHub Secret.
         aws-region: ${{ secrets.AWS_REGION }}
     
+    # Logs Docker in to Amazon ECR.
     - name: Login to Amazon ECR
+      # Uses the AWS ECR login action.
       uses: aws-actions/amazon-ecr-login@v2
 
+    # Builds the Docker image from the repository Dockerfile.
     - name: Build Docker image
-      run: 
+      # Runs a shell command on the GitHub runner.
+      run:
+        # Tags the image with the ECR repository path and latest tag.
         docker build -t ${{ secrets.ECR_REPO }}:latest .
     
+    # Pushes the built image to ECR.
     - name: Push Docker image to Amazon ECR
-      run:
+      run: 
+        # Uploads the latest-tagged image to the ECR repository.
         docker push ${{ secrets.ECR_REPO }}:latest
+
+
+  # Deployment job that would deploy the pushed image to a server such as EC2.
+  deploy:
+    # Runs the deploy job on a temporary GitHub-hosted Ubuntu machine.
+    runs-on: ubuntu-latest
+    # Waits until the Docker build-and-push job has completed successfully.
+    needs: docker-build-push
+
+    steps:
+    - name: Deploy via SSH to EC2
+      uses: appleboy/ssh-action@v1.2.0
+      with:
+        # EC2 instance IP address stored as a GitHub Secret.
+        host: ${{ secrets.EC2_HOST }}
+        # Default SSH login user for Ubuntu-based EC2 instances.
+        username: ubuntu
+        # SSH private key stored as a GitHub Secret.
+        key: ${{ secrets.SSH_PRIVATE_KEY_EC2 }}
+        script:
+          # Pulls the latest image versions defined in docker-compose.yml onto the EC2 server.
+          - docker compose pull
+
+          # Recreates and starts the containers in detached mode using the latest pulled images.
+          - docker compose up -d --force-recreate

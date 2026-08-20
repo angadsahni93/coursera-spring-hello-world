@@ -60,6 +60,44 @@ chmod +x script.sh
 docker pull redis
 ```
 
+## EC2 Deployment Compose File
+
+After setting up the `deploy` job in `pipeline.yml`, create or edit `docker-compose.yml` on the EC2 server:
+
+```bash
+nano docker-compose.yml
+```
+
+This file is needed on EC2 because the deploy job runs Docker Compose commands on the EC2 server:
+
+```yaml
+script:
+  - docker compose pull
+  - docker compose up -d --force-recreate
+```
+
+The EC2 `docker-compose.yml` tells Docker which image to pull from ECR, which container to run, and which ports to expose.
+
+Example EC2 `docker-compose.yml`:
+
+```yaml
+version: "3.8"
+
+services:
+  app:
+    image: 898732116894.dkr.ecr.eu-north-1.amazonaws.com/coursera/spring-boot-docker:latest
+    ports:
+      - "8080:80"
+```
+
+The port mapping is correct:
+
+```text
+EC2 port 8080 -> container port 80
+```
+
+So the app should be reached through EC2 on port `8080`, while the Spring Boot container still listens internally on port `80`.
+
 
 ## GitHub Actions Pipeline Flow
 
