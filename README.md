@@ -1,4 +1,4 @@
-Just a sample hello world application using Java/Spring Boot
+# A Coursera Training Course ([Coursera Certificate](https://www.coursera.org/account/accomplishments/verify/TZGGSGMPWE16))
 
 ## CI/CD schematic:
 
